@@ -9,6 +9,27 @@
 | Method | **Static code inspection only** (full-file reads + scripted cross-reference scans) + non-destructive syntax checks. **No runtime execution of application logic, no database was created/read/modified, no fixes were applied.** |
 | Companion | `README.md` (reference manual). This report is the engineering findings register. |
 
+> **Post-audit change addendum (2026-10-17, after the inspected commit):** the dedicated
+> **Notes module was permanently removed** (Notes page, text note, dated table notes,
+> external-expenses modal + client-page summary card, and all exclusively-owned
+> functions/handlers/CSS — 1,046 lines deleted, 6 lines added in `sarfindexed.html`:
+> 11,616 → 10,576 lines). IndexedDB was migrated **v3 → v4**: `onupgradeneeded` now deletes
+> the `notes` object store if present and never creates it for fresh databases; all other
+> stores/indexes/records are preserved. This migration **permanently erases legacy Notes and
+> external-expenses data** on first open of an existing database. Backup no longer exports
+> `notes`; `restoreData` no longer lists it, so **old backups containing `notes` restore
+> successfully with that entry ignored** (store is not recreated). A saved page state of
+> `notes` falls back to the default home page via the existing `if (!pageEl) return;` guard.
+> Verification actually performed: `node --check` on both script blocks (pass); handler/ID
+> cross-reference (108 handlers, 0 unresolved; 0 remaining references to removed IDs); the
+> real extracted `initDB` + `restoreData` executed in Node against IndexedDB stubs
+> (fresh/upgrade/restore-old/restore-new: 11/11 pass); the real `restorePageState` executed
+> with DOM stubs for `notes`/unknown states (safe fallback, 5/5 pass). **Not** verified in a
+> real browser — runtime smoke test on a disposable profile is still required. Consequently:
+> **AUDIT-001 and AUDIT-002 are marked "Superseded by removal"** (the feature, not the bug,
+> was removed — see §7 annotations and §10). Line numbers throughout this report remain
+> references to the inspected pre-removal file; do not treat any other finding as resolved.
+
 **Classification vocabulary used for every finding:**
 `Confirmed defect` (the faulty behavior follows necessarily from the code as written; not
 necessarily runtime-reproduced) · `Potential risk` (plausible failure needing runtime/scenario
@@ -44,8 +65,11 @@ the Critical/High items in §9 are remediated and the business rules in §8 are 
 app is, however, small enough (one file, no dependencies to upgrade) that a focused hardening
 sprint is realistic — see the roadmap.
 
-**Counts:** 46 findings — Confirmed defects 19 · Potential risks 11 · Missing capabilities 6 ·
-Unverified behaviors 3 · Business-rule clarifications 7. (IDs AUDIT-001…AUDIT-046.)
+**Counts:** 46 findings, IDs AUDIT-001…AUDIT-046, each issued once — Confirmed defects 22 ·
+Potential risks 11 · Missing capabilities 6 · Unverified behaviors 2 · Business-rule
+clarifications 5. *(Two of the 22 confirmed defects — AUDIT-001/AUDIT-002 — were later
+superseded by removal of the Notes module; see the addendum above. All other findings
+remain open as written against the inspected commit.)*
 
 ---
 
@@ -53,7 +77,8 @@ Unverified behaviors 3 · Business-rule clarifications 7. (IDs AUDIT-001…AUDIT
 
 - **Entry:** `sarfindexed.html` lines 1–9 load only local resources (`cairo-font.css`,
   `tailwind.css`, `xlsx.full.min.js` 0.18.5). Inline CSS 10–381. Body markup 384–2708.
-  Script 1: 2709–10730. Modal markup 10732–10830. Script 2: 10831–11386. Trailing modals
+  Script 1: 2709–10730. Modal markup 10732–10830 (`addVehicleModal`, `addOfficeModal`,
+  `restoreModal`). Script 2: 10831–11386. Trailing modals
   11388–11616 (`receiptSaveWithdrawModal` 11389, `receiptDeleteRestoreModal` 11443,
   `editReceiptModal` 11496).
 - **Boot (`window.load`, ~3591):** DevTools blocker arms at 2712 → `initDB()` (2749) opens
@@ -80,7 +105,7 @@ Unverified behaviors 3 · Business-rule clarifications 7. (IDs AUDIT-001…AUDIT
 | 8 | Office detail | embedded-copy karta cards w/ statuses, filters, edit (loads master), office-copy delete, debts ledger (`remaining=net−arrived`) | CRUD: offices, receipts |
 | 9 | All receipts | date + isPaid + take filters; Σtotal/Σremaining; status selects; edit/print/delete; export-all Excel (modes 1/2/3 + summary) | CRUD: receipts, offices |
 | 10 | Treasury | 3 accounts; deposit/withdraw/transfer (mirrored pair, overdraw block); tx list/edit/soft-delete; denominations (display only); daily closing; alerts (localStorage); forecast = Σ office last-debt remaining | CRUD: treasuryTransactions, dailyClosing |
-| 11 | Notes | text note; dated table notes (add/search/edit/delete/bulk/print); external-expenses modal (positional arrays, Σ first column, document.write print) | CRUD: notes (single record!) |
+| 11 | Notes | **REMOVED 2026-10-17 (post-audit)** — formerly: text note; dated table notes (add/search/edit/delete/bulk/print); external-expenses modal + client-page summary card. The `notes` store is dropped by the v4 migration (see addendum). Per-receipt/debt note fields in #6/#8 were preserved (independent features) | ~~CRUD: notes~~ |
 | 12 | Packages | static pricing display only | — |
 | — | Global | JSON backup (all stores/all users), restore (clear+reinsert), 7-day auto-backup prompt, page-state restore | all stores |
 
@@ -121,7 +146,8 @@ negative/NaN checks; several `onerror` handlers missing or resolving-as-success 
 
 ## 5. IndexedDB schema & data-flow map
 
-DB `KartaSystemDB` **v3** (2751). Stores: `users`(keyPath `username`), `vehicleOwners`
+DB `KartaSystemDB` **v3** at inspection (2751) — **now v4 after the 2026-10-17 removal; the
+`notes` store below no longer exists (addendum)**. Stores: `users`(keyPath `username`), `vehicleOwners`
 (`id` autoInc, idx `username`), `offices` (`id`, idx `username`), `receipts` (`id`, idx
 `username`), `notes` (keyPath `username` — one record per user containing `notes[]`,
 `textNote`, `expenses`, `expenseHeaders`), `treasuryTransactions` (`id`; idx `username`,
@@ -173,13 +199,16 @@ fields (`isPaid`/`paymentStatus`, `isTaken`/`takeStatus`) written asymmetrically
 
 ### Confirmed defects
 
-**AUDIT-001 — Confirmed defect — Critical.** Adding table notes **deletes the text note and
+**AUDIT-001 — Confirmed defect — Critical. — STATUS (2026-10-17): SUPERSEDED BY REMOVAL of the
+Notes module (see addendum). The defect was not individually fixed; the feature and its
+`notes` store were deleted.** Adding table notes **deletes the text note and
 all external-expenses data**. Evidence: the `notes` record jointly holds `notes[]`,
 `textNote` (written at 3028), `expenses`/`expenseHeaders` (8715/8718); the add-notes handler
 writes `store.put({username, notes: existingNotes, lastModified})` at **3161–3165**, replacing
 the whole record. Impact: silent, irreversible loss of two features' data on a routine action.
 
-**AUDIT-002 — Confirmed defect — High.** Note edit/delete/bulk act on the **wrong note**.
+**AUDIT-002 — Confirmed defect — High. — STATUS (2026-10-17): SUPERSEDED BY REMOVAL of the
+Notes module (see addendum).** Note edit/delete/bulk act on the **wrong note**.
 `displayNotes` sorts by date desc (3217) and embeds the *sorted* index in buttons (3229/3234);
 `editNote`/`saveNoteEdit`/`deleteNote` re-read the *stored, unsorted* array and apply that
 index (3255, 3298, 3324). Impact: edits/deletes hit a different record than the one displayed.
@@ -422,7 +451,9 @@ test with a real legacy backup fixture, XSS escaping tests on all render paths.
 ## 10. Prioritized remediation roadmap
 
 **Critical (before any real financial data):**
-1. AUDIT-001 notes record overwrite — merge-write (`{...existing, notes}`) + regression test.
+1. ~~AUDIT-001 notes record overwrite~~ — **done by alternative means (2026-10-17): the Notes
+   module + store were removed entirely instead of merge-writing** (see addendum). No
+   regression test exists yet for the migration in a real browser — add one.
 2. AUDIT-004 atomic receipt save (single multi-store transaction or compensating rollback);
    stop swallowing errors (6453).
 3. AUDIT-019 credential storage: salted hash (e.g. WebCrypto PBKDF2), never persist password/
@@ -430,7 +461,8 @@ test with a real legacy backup fixture, XSS escaping tests on all render paths.
 4. AUDIT-035 per-user backup scoping (or explicit admin-only with warning).
 
 **High:**
-5. AUDIT-002 stable note IDs (index→id). 6. AUDIT-003 keep pending data until success/cancel.
+5. ~~AUDIT-002 stable note IDs (index→id)~~ — **moot: Notes module removed (2026-10-17)**.
+6. AUDIT-003 keep pending data until success/cancel.
 7. AUDIT-005 remove or repair the legacy inline editor; one edit path only. 8. AUDIT-006/007/
 008 cascading/merge semantics + confirm dialogs listing impact. 9. AUDIT-010 treasury edit
 sign logic. 10. AUDIT-020 output escaping for all `innerHTML`/`document.write` paths.
@@ -456,7 +488,8 @@ seeded usernames (existing DBs key data by them).
   profile + fictional data, because restore/wipe operations are destructive and backups are
   all-user. Obtain a real (anonymized) backup JSON fixture early — AUDIT-034 blocks safe
   schema work without it.
-- **Sequencing:** fix Critical data-loss/atomicity first (AUDIT-001/002/003/004), then delete
+- **Sequencing:** fix Critical data-loss/atomicity first (AUDIT-001/002 now superseded by the
+  Notes removal; start with AUDIT-003/004), then delete
   -path semantics (006/007/008) **together with owner answers** to §8 Q1/Q7 — these change
   money semantics and must not be "fixed" by assumption. Do not let any agent renumber or
   close audit IDs; reference them in every task/PR.

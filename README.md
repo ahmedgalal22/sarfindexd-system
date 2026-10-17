@@ -9,6 +9,15 @@
 > The companion file **`SYSTEM_AUDIT_REPORT.md`** contains the engineering audit (defects,
 > risks, remediation roadmap). This README describes what the code does; it does not certify
 > that the application is safe for production financial data.
+>
+> **Revision 2026-10-17 — Notes module permanently removed.** The dedicated Notes page
+> (text note, dated table notes) and the external-expenses modal were deleted, the database
+> was migrated from **v3 → v4** (the `notes` object store is dropped on upgrade — see §9.1
+> for the destructive impact), and backup/restore were adjusted accordingly. This revision
+> updates the manual to the post-removal state. Line numbers that were not individually
+> re-verified now refer to the pre-removal inspected file and have shifted by roughly
+> −1,040 lines; function/element names remain the reliable anchors. Per-receipt note fields
+> in Vehicle/Office detail were **not** part of the removed module and still exist.
 
 ---
 
@@ -17,8 +26,8 @@
 | Item | Value (verified from source) |
 |---|---|
 | Product name (in UI/code) | "Karta System" (UI is Arabic, RTL) |
-| Main file | `sarfindexed.html` — 11,616 lines, 652,854 bytes |
-| Purpose | Single-page, offline, browser-local application for managing transport "karta" (كارتة) payment receipts for vehicle owners (أصحاب المركبات), offices (المكاتب), debts (المديونيات), a cash treasury (الخزنة), notes/expenses, printing, Excel import/export, and JSON backup/restore |
+| Main file | `sarfindexed.html` — 10,576 lines, 599,943 bytes (after the 2026-10-17 Notes removal; 11,616 lines before) |
+| Purpose | Single-page, offline, browser-local application for managing transport "karta" (كارتة) payment receipts for vehicle owners (أصحاب المركبات), offices (المكاتب), debts (المديونيات), a cash treasury (الخزنة), printing, Excel import/export, and JSON backup/restore |
 | Users | Seeded local accounts only (3 accounts are created by code on first run; see §5.1). No registration screen was found |
 | Data location | **This browser, this device only** (IndexedDB + localStorage). No server, no cloud sync, no network calls exist in the code |
 | Status | Working static inspection target; contains known defects listed in §13 and in `SYSTEM_AUDIT_REPORT.md`. Not validated by any automated test suite (none exists) |
@@ -32,9 +41,9 @@ search, filters, period totals), per-office receipt copies and debts ledger, a r
 treasury integration on receipt save/delete (withdraw/refund), an "all receipts" browser with
 filters, a treasury module (cash/Vodafone/bank accounts, deposits, withdrawals, transfers,
 denomination counter, daily closing, alerts, forecast), a client/reporting page, debt-age
-notifications (≥ 30 days), notes (free-text + dated table notes) and an external-expenses
-table, printing (multiple paths), Excel import/export (SheetJS), full JSON backup/restore and a
-7-day auto-backup prompt.
+notifications (≥ 30 days), printing (multiple paths), Excel import/export (SheetJS), full JSON
+backup/restore and a 7-day auto-backup prompt. *(A former Notes page and external-expenses
+table were permanently removed on 2026-10-17; see §5.11.)*
 
 **Out of scope / not present:** any backend, multi-device sync, roles/permissions, audit
 trail/history of edits, password management UI, automated tests, build tooling, or a payment
@@ -52,9 +61,9 @@ Verified from the actual files (not assumed):
 | Markup | One HTML file, `lang="ar"`, `dir="rtl"` | `sarfindexed.html` lines 1–9 |
 | Styling | (a) Pre-generated utility CSS file `tailwind.css` (Tailwind-style class names; **not** the Tailwind CDN/play build); (b) one inline `<style>` block (lines 10–381) with custom CSS (print rules, drag styles, packages page, scrollbars) | `tailwind.css` header: *"Generated for Karta System… Covers all 351 utility classes used in index_filters.html… Compatible with @tailwindcss/browser@4… Generated: 2026-02-18"* |
 | Font | Self-hosted "Cairo" via `cairo-font.css`, referencing `fonts/*.woff2` — **the `fonts/` directory is missing from the repo**, so the browser falls back to default fonts | `cairo-font.css`; `ls fonts` → absent |
-| JavaScript | Vanilla JS only (no framework, no modules, no bundler). Two inline `<script>` blocks: lines 2709–10730 (main app) and 10831–11386 (receipt Excel + treasury-linked edit/delete modals). Extensive use of inline `onclick`/`onchange` handlers and `window.*` globals | Direct inspection; 239 function definitions found by static parse |
+| JavaScript | Vanilla JS only (no framework, no modules, no bundler). Two inline `<script>` blocks (main app; receipt Excel + treasury-linked edit/delete modals). Extensive use of inline `onclick`/`onchange` handlers and `window.*` globals | Direct inspection; 218 function definitions by static parse (239 before Notes removal) |
 | Spreadsheet | SheetJS (`xlsx.full.min.js`), version string `0.18.5`, loaded locally at line 9 | `xlsx.full.min.js` (881,727 bytes) |
-| Database | Browser **IndexedDB**, database `KartaSystemDB`, version **3** | `indexedDB.open(DB_NAME, DB_VERSION)` line 2751; constants at ~2745 |
+| Database | Browser **IndexedDB**, database `KartaSystemDB`, version **4** (was 3 before 2026-10-17; the v4 upgrade deletes the legacy `notes` store — §9.1) | `indexedDB.open(DB_NAME, DB_VERSION)` with `DB_VERSION = 4` in `initDB` |
 | Secondary storage | `localStorage` for session, page-state, migration flags, treasury alert/denomination preferences | See §9.4 |
 | Network | **None.** No CDN links, no `fetch`/XHR, no external URLs (only a comment in `cairo-font.css`). All three head resources are local files | Lines 7–9; static scan found 0 `fetch(`, 0 `XMLHttpRequest`, 0 `sessionStorage` |
 
@@ -79,7 +88,7 @@ The repository contains exactly five files (verified with `git ls-files` / `find
 
 | File | Size | Role |
 |---|---|---|
-| `sarfindexed.html` | 652,854 bytes / 11,616 lines | The entire application: markup (≈384–2708), inline CSS (10–381), main script (2709–10730), second script (10831–11386), trailing modal markup (11388–11616) |
+| `sarfindexed.html` | 599,943 bytes / 10,576 lines | The entire application: inline CSS (10–373), body markup (≈376–2386), main script (2387–9690), second script (9791–10346), trailing modal markup (10348–10576) |
 | `tailwind.css` | 31,696 bytes / 574 lines | Pre-generated utility CSS (see §2 caveats) |
 | `cairo-font.css` | 5,336 bytes / 134 lines | `@font-face` declarations for Cairo; depends on missing `fonts/` |
 | `xlsx.full.min.js` | 881,727 bytes | SheetJS 0.18.5 (Excel read/write) |
@@ -89,22 +98,23 @@ Internal layout of `sarfindexed.html`:
 
 - Lines 1–9: doctype, head, local resource links (`cairo-font.css`, `tailwind.css`,
   `xlsx.full.min.js`).
-- Lines 10–381: inline `<style>`.
-- Lines 384–2708: body markup — login screen, sidebar navigation, all pages
+- Lines 10–373: inline `<style>`.
+- Lines ≈376–2386: body markup — login screen, sidebar navigation, all pages
   (`home`, `client`, `receipt`, `allReceipts`, `vehicles`, vehicle detail, `offices`, office
-  detail, `treasury`, `notes`, `packages`), datalists, early modals (expenses modal at ~2563).
-- Lines 2709–10730: **Script 1** — DevTools blocker, IndexedDB init, auth, navigation/page
-  state, notes, dashboard, migrations, vehicles CRUD/details/debts, karta rendering + **two
-  receipt-editing implementations** (inline card editor *and*, in Script 2, a modal editor),
-  operations table, receipt form + save flow, offices CRUD/details/debts/kartas, notifications,
-  client page, external expenses, all-receipts + status synchronization, backup/restore,
-  drag-and-drop ordering, vehicle/office Excel, de-duplication, treasury module, export-all.
-- Lines 10732–10830: modal markup between the two scripts (`addVehicleModal` 10732,
-  `addOfficeModal` 10774, `restoreModal` 10815).
-- Lines 10831–11386: **Script 2** — receipt-form Excel export/import, delete-with-treasury
+  detail, `treasury`, `packages`) and datalists.
+- Lines 2387–9690: **Script 1** — DevTools blocker, IndexedDB init (incl. the v4
+  notes-store-drop migration), auth, navigation/page state, dashboard, data migrations,
+  vehicles CRUD/details/debts, karta rendering + **two receipt-editing implementations**
+  (inline card editor *and*, in Script 2, a modal editor), operations table, receipt form +
+  save flow, offices CRUD/details/debts/kartas, notifications, client page, all-receipts +
+  status synchronization, backup/restore, drag-and-drop ordering, vehicle/office Excel,
+  de-duplication, treasury module, export-all.
+- Lines 9692–9790: modal markup between the two scripts (`addVehicleModal`,
+  `addOfficeModal`, `restoreModal`).
+- Lines 9791–10346: **Script 2** — receipt-form Excel export/import, delete-with-treasury
   -refund flow, receipt **edit modal** (`em*` functions).
-- Lines 11388–11616: static modal markup: `receiptSaveWithdrawModal` (11389),
-  `receiptDeleteRestoreModal` (11443), `editReceiptModal` (11496).
+- Lines 10348–10576: static modal markup: `receiptSaveWithdrawModal`,
+  `receiptDeleteRestoreModal`, `editReceiptModal`.
 
 ---
 
@@ -261,17 +271,27 @@ display aid only, persisted per user in `localStorage` `karta_denom_<user>`), **
 (`localStorage karta_alerts_<user>`), and a simple forecast = Σ of each office's last debt
 `remaining`.
 
-### 5.11 Notes (الملاحظات)
-Two tabs backed by the single per-user record in the `notes` store:
-- **Text note:** one big textarea (`textNote`), save (line 3019) / print.
-- **Table notes:** dated notes `notes[]{date,title,content,...}` with add form (multi-row),
-  search, inline edit, delete, bulk delete, print. ⚠️ Two confirmed defects live here:
-  adding table notes wipes the text note + expenses data (AUDIT-001), and edit/delete act on
-  the wrong note when dates are unsorted (AUDIT-002).
-- **External expenses (المصروفات الخارجية):** a modal with a free-form table (amount, date,
-  description + user-added columns) stored positionally as arrays in the *same* notes record
-  (`expenses`, `expenseHeaders`; `saveExpenses` 8696). Total = Σ first-column amounts
-  (`calculateTotalExpenses` 8674). Print uses a `document.write` window (line ~8816).
+### 5.11 Notes (الملاحظات) — **REMOVED 2026-10-17**
+
+This page no longer exists. Removed in full: the sidebar entry and `notesPage`; the text-note
+tab (textarea/save/print); the dated table-notes tab (add form, search, inline edit/delete,
+bulk delete, print); the external-expenses summary card on the client page and its modal
+(data-entry table, totals, print); all backing functions/handlers (`switchNotesTab`,
+`loadNotes`, `loadTextNote`, `loadTableNotes`, `displayNotes`, `editNote`, `saveNoteEdit`,
+`deleteNote`, `updateBulkDeleteNotesVisibility`, `openExpensesModal`, `closeExpensesModal`,
+`addExpenseRow/Column`, `removeExpenseRow/Column`, `calculateTotalExpenses`,
+`attachExpenseCalculations`, `saveExpenses`, `loadExpensesInModal`, `printExpenses`); and
+the boot/page-restore calls that loaded it. A saved page state pointing at `notes` now falls
+back to the default home/dashboard page (the existing `if (!pageEl) return;` guard in
+`restorePageState` runs before anything is hidden/shown).
+
+**Data impact:** these features were backed by the `notes` IndexedDB store. The v3→v4
+migration **deletes that store** — see §9.1. Any text notes, dated notes, and external
+-expenses data in an existing browser database are permanently erased the first time the
+updated app opens that database. Back up first if that data must be retained outside the app.
+
+Independent per-receipt note fields (Vehicle Detail / Office Detail cards) and debt-row note
+fields were *not* part of this module and remain fully functional (§5.6/§5.8).
 
 ### 5.12 Packages (الباقات)
 Static marketing/pricing cards. No purchase, activation, or feature-gating logic exists.
@@ -376,7 +396,8 @@ record.
 ## 7. Functions and modules (overview)
 
 There are no modules/files to import — everything is global-scope functions in two script
-blocks. 239 function definitions were counted statically (including nested closures). Key
+blocks. 218 function definitions were counted statically (including nested closures; 239
+before the Notes removal, which deleted 21). Key
 groups (line numbers refer to `sarfindexed.html` @ inspected commit; the audit report's
 appendix contains the complete generated index):
 
@@ -384,14 +405,12 @@ appendix contains the complete generated index):
 |---|---|---|
 | Boot/DB | `initDB` (2749), boot `window.load` (~3591), `migrateFixOfficeRows` (3442), `migrateAddRowIds` (3512) | Open/upgrade DB, seed users, run data migrations, restore session + page state |
 | Auth/nav | login handler (~2843+), `savePageState` (2931) | Session in localStorage, page switching/restore |
-| Notes | `loadNotes`/`loadTableNotes` (3182), `displayNotes` (3204), `editNote` (3248), `deleteNote` (3315), save-text-note (3019) | Per-user notes record CRUD |
 | Dashboard | `updateDashboardStats` (3405) | Aggregate stat cards |
 | Vehicles | `loadVehicleOwners` (3767), `displayVehicleOwners` (3795), `editVehicleOwner` (3865), `saveVehicleEdit` (3908), `deleteVehicleOwner` (3942), bulk delete (~4059) | Owner CRUD/search/filter |
 | Vehicle detail | `loadKartas` (4639), `displayKartas` (5032), `buildReceiptEditFormHTML` (4676), `saveReceiptEdits` (4907), `toggleReceiptEdit` (4872), `viewFullReceipt` (~5260), `searchKartasByDate` (5195), `applyVehicleKartaFilter` (5382), debts: `recalculateAllDebts` (4332), `addDebtRow` (4357), operations: `openOperationsManagement` (5438), `saveOperationsData` (5767) | Cards, both editors, debts, scratchpad |
 | Receipt form | `loadVehicleOwnersForReceipt` (5806), `loadOfficesForReceipt` (5821), row calc `calculateNet` closure (6068), `calculateTotals` (~6100s), `saveReceipt` (6249), `rswConfirm` (6358), `addDebtRowFromReceipt` (6191), `saveOrUpdateVehicleOwner` (6422), `saveToOffices` (6458), `printReceipt` (6544) | Creation + treasury-linked save |
 | Offices | `loadOffices` (6680), `displayOffices` (6706), `editOffice` (6834), `deleteOffice` (6909), `applyOfficesListFilter` (7025), `loadOfficeKartas` (7433), `printSingleReceipt` (7913), `deleteReceipt` (7907) | Office CRUD/detail/period totals |
 | Notifications/client | notifications (~8073), `loadClientData` (8236), `calculateOfficesTotal` (8292) | Debt-age alerts, reporting |
-| Expenses | `calculateTotalExpenses` (8674), `saveExpenses` (8696), `loadExpensesInModal` (8735), `printExpenses` (8811) | External expenses in notes record |
 | All receipts/status | `applyAllReceiptsFilter` (8931), `displayAllReceipts` (9067), `getPaymentStatus` (9295), `setReceiptPaymentStatus` (9325), `setReceiptRowStatus` (9456) | Browsing + status sync across copies |
 | Backup | backup (~9553), `restoreBackup` (9617), auto-backup check (~9698) | JSON export/import of all stores |
 | Order/Excel/dedupe | `initDragDrop` (~9733), `loadSheetJS` (9804, **no-op**), vehicle/office Excel (~9821+), `removeDuplicateVehicles/Offices` (~9989/10028) | Utilities |
@@ -408,7 +427,7 @@ plus `window._vehicleReceiptsCache`. Duplicated implementations exist for the ro
 **Error-handling style:** sparse — ~11 `try/catch` sites in 11.6k lines; user feedback is via
 ~103 `alert()` / 15 `confirm()` / 1 `prompt()`; many IndexedDB `onerror` handlers are absent or
 swallow errors. Rendering uses `innerHTML` template strings without escaping (63 sites) plus
-4 `document.write` print windows (§14).
+3 `document.write` print windows (§14).
 
 ---
 
@@ -420,7 +439,8 @@ swallow errors. Rendering uses `innerHTML` template strings without escaping (63
 3. On `window.load` (~3591): `initDB()` → seed users if `users` empty → run
    `migrateAddRowIds()` then `migrateFixOfficeRows()` (each gated by a localStorage flag) →
    restore session from `localStorage.currentUser` → restore page state
-   (`karta_pageState`) → render dashboard + notes.
+   (`karta_pageState`) → render dashboard (an old state naming the removed `notes` page is
+   ignored — the default home page stays visible, §5.11).
 4. Additional `window.load` listeners (9371, 9534, 9727) wire status controls, backup
    auto-check, and drag-drop.
 
@@ -432,11 +452,25 @@ graceful fallback UI beyond the promise rejection path.
 ## 9. IndexedDB & persistence architecture (complete)
 
 ### 9.1 Database
-- **Name:** `KartaSystemDB` · **Version:** 3 (`initDB`, line 2749–2751).
+- **Name:** `KartaSystemDB` · **Version:** 4 (`DB_VERSION = 4` in `initDB`; was 3 until
+  2026-10-17).
 - `onupgradeneeded` creates any missing stores/indexes (creation is guarded by
-  `objectStoreNames.contains`). No destructive version-change logic was found, but upgrades
-  from real-world v1/v2 databases were **not testable** (no sample databases exist in the
-  repo) — classified unverified in the audit.
+  `objectStoreNames.contains`); existing stores/records are never recreated.
+- **v3 → v4 migration (Notes removal, destructive for Notes data only):** during the upgrade
+  transaction the legacy `notes` object store is deleted if present
+  (`if (db.objectStoreNames.contains('notes')) db.deleteObjectStore('notes');`), and it is
+  no longer created for fresh databases. ⚠️ **This permanently erases, for every user on that
+  browser origin, the stored text note (`textNote`), dated table notes (`notes[]`), and
+  external-expenses table (`expenses`, `expenseHeaders`)** the first time the updated app
+  opens an existing database. All other stores, indexes, IDs, and records are untouched; no
+  other migration flags change. Take a JSON backup *with the old build* beforehand if this
+  data must be kept for reference (it cannot be restored into the removed store afterward —
+  restoring an old backup simply ignores its `notes` entry, §11).
+- Upgrades from real-world v1/v2 databases were **not testable** (no sample databases exist
+  in the repo) — classified unverified in the audit. The v4 upgrade/fresh-init logic itself
+  was exercised against the extracted `initDB`/`restoreData` code with stubbed IndexedDB
+  (11/11 checks passed, 2026-10-17); a real-browser run on a disposable profile is still
+  recommended.
 
 ### 9.2 Object stores
 
@@ -446,7 +480,6 @@ graceful fallback UI beyond the promise rejection path.
 | `vehicleOwners` | `id` (autoIncrement) | `username` | `{id, name, vehicleNumber, phone, received, username, createdAt, receipts: [receiptId…], debts: [{balance, paid, remaining, date, notes}], initialBalance, operations: [{col1…colN}], sortOrder}` |
 | `offices` | `id` (autoIncrement) | `username` | `{id, name, phone, received, username, createdAt, receipts: [{receiptId, ownerName, receiptDate, createdAt?, rows: […office rows]}}, debts: [{net, arrived, remaining, date, notes}], sortOrder}` |
 | `receipts` | `id` (autoIncrement) | `username` | `{id, ownerName, receiptDate, companyName, companyPhone, companyInfo, username, createdAt, rows: […], totals: {total, rowCount?, previousBalance, paid, debt, additional, remaining}, isPaid, paymentStatus, isTaken, takeStatus, notes}` |
-| `notes` | `username` | — | **One record per user holding four features:** `{username, notes: [{date,title,content,username,createdAt}], textNote, expenses: [[cell…]…], expenseHeaders: […], lastModified}` |
 | `treasuryTransactions` | `id` (autoIncrement) | `username`, `accountType`, `date` | `{id, username, accountType: cash|vodafone|bank, opType, credit, debit, beforeBalance, afterBalance, description, date, time, timestamp, deleted}` |
 | `dailyClosing` | `id` (autoIncrement) | `username`, `date` | Daily closing snapshots (created in treasury module ~10421) |
 
@@ -468,7 +501,9 @@ There are no foreign keys. Linkage is by convention:
 - Boot migrations: `migrateAddRowIds` (3512) back-fills `_rowId` on receipt + office-copy
   rows; `migrateFixOfficeRows` (3442) repairs office-copy row structures. Each runs once per
   browser (localStorage flags `rowIdMigrationDone`, `officeRowsMigrationDone`); **backup
-  restore clears both flags**, so migrations re-run after a restore.
+  restore clears both flags**, so migrations re-run after a restore. Separately, the v3→v4
+  *schema* upgrade (§9.1) drops the removed `notes` store inside `onupgradeneeded`; it is
+  unrelated to these flags and runs exactly once per database via the version bump.
 
 ### 9.4 localStorage keys
 `currentUser` (full user record incl. password), `karta_pageState`, `rowIdMigrationDone`,
@@ -525,7 +560,7 @@ path (6372). Receipt save withdraws `totals.remaining`; receipt delete can depos
 
 **Client/reporting aggregates:** profit = Σ `row.expense`; office period net = Σ office-copy
 `row.net` within `receiptDate` range; all-receipts summary = Σ `totals.total` /
-Σ `totals.remaining` over the filtered set. External-expenses total = Σ first-column amounts.
+Σ `totals.remaining` over the filtered set.
 
 **Numeric handling (verified by counting call sites):** `parseFloat` ×111, `Number` ×49,
 `parseInt` ×11, `toFixed` ×105. The dominant pattern is `parseFloat(x) || 0` — invalid/empty
@@ -542,8 +577,8 @@ submission is possible: save buttons are not disabled during the async save chai
 
 | Capability | Where | Format & behavior (verified) |
 |---|---|---|
-| Full backup | ~9553 | Downloads JSON `{version:'2.0', data:{…}}` containing **all 7 stores for ALL users** (not just the logged-in user — AUDIT-035) |
-| Restore | `restoreBackup` 9617 | File picker → checks only that `version` and `data` exist → **clears each store and re-inserts records preserving IDs** → clears migration flags (9645) → reloads. No schema/record validation |
+| Full backup | `createBackup` | Downloads JSON `{version:'2.0', data:{…}}` containing **all 6 stores for ALL users** (not just the logged-in user — AUDIT-035). The removed `notes` store is no longer included (pre-removal builds exported 7 stores) |
+| Restore | `restoreBackup` / `restoreData` | File picker → checks only that `version` and `data` exist → **clears each supported store and re-inserts records preserving IDs** → clears migration flags → reloads. No schema/record validation. **Old backups containing a legacy `notes` entry restore safely: that entry is ignored and the store is not recreated** (restore iterates its supported-store list, which no longer contains `notes`) |
 | Auto-backup | ~9698 | If `localStorage.lastAutoBackup` is older than **7 days** (constant misleadingly named `TWO_WEEKS` = `7*24*60*60*1000`), prompts/offers a backup download |
 | Receipt form → Excel | `exportReceiptToExcel` 10833 | Exports current form grid; separator written as `--- رقم المركبة: <name> ---` with `إجمالي ما سبق: <subtotal>` in the last column; file `<owner>_<date>.xlsx` |
 | Excel → receipt form | `importReceiptFromExcel` 10880 | Reads first sheet, **replaces the entire form grid without confirmation**, recognizes separators **only** in the `--- رقم المركبة:` format, trusts file values until the next recalculation; no payment/delivery statuses or totals are imported |
@@ -562,10 +597,10 @@ it.
 
 Three mechanisms coexist:
 1. `window.print()` of the current page (global `@media print` CSS: A4 landscape, `.no-print`
-   elements hidden) — used by lists, details pages, notes, receipt form
-   (`printReceipt` 6544, `printVehicleDetails` 5377, `printOfficeDetails` 7897, etc.).
-2. Generated print windows via `document.write` — debts table (~4622), operations table
-   (~5751), external expenses (~8816).
+   elements hidden) — used by lists, details pages, and the receipt form
+   (`printReceipt`, `printVehicleDetails`, `printOfficeDetails`, etc.).
+2. Generated print windows via `document.write` — debts table, operations table,
+   single-receipt document internals.
 3. `printSingleReceipt` (7913): builds a standalone A4-landscape receipt document.
    Known defects: it draws the header image to a canvas and then ignores the canvas,
    referencing the missing `wasel.png` instead (7930); separator rows span 8+7=15 columns in
@@ -580,9 +615,10 @@ unescaped-content behavior as the screens (§14).
 
 Most consequential, all evidence-backed in `SYSTEM_AUDIT_REPORT.md`:
 
-1. **Notes data loss:** adding table notes wipes the text note and external-expenses data
-   (same DB record overwritten) — AUDIT-001.
-2. **Wrong-note edits/deletes** due to sorted display vs unsorted storage indices — AUDIT-002.
+1. ~~**Notes data loss** (AUDIT-001)~~ and ~~**wrong-note edits/deletes** (AUDIT-002)~~ —
+   **superseded by removal:** the entire Notes module was deleted on 2026-10-17 (§5.11); the
+   underlying bugs were not individually fixed because the feature no longer exists. Note
+   the migration itself erases legacy Notes data by design (§9.1).
 3. **Receipt save retry dead-end** after insufficient treasury balance — AUDIT-003.
 4. **Non-atomic receipt save** across ≥5 transactions; silent partial failures — AUDIT-004.
 5. **Lossy legacy inline receipt editor** (loses row IDs/separators; floods office copies
@@ -609,7 +645,7 @@ record for real financial data** without compensating manual backups after every
   all business data in seconds. There is no lockout, no session expiry.
 - **No authorization:** all accounts can perform all actions, including backup export of
   **every** user's data and destructive bulk operations.
-- **Stored-XSS surface:** user/office/vehicle names, notes, and imported Excel/backup content
+- **Stored-XSS surface:** user/office/vehicle names, per-receipt/debt note texts, and imported Excel/backup content
   are interpolated into `innerHTML` (63 sites) and `document.write` print documents without
   escaping. In a single-user local app this is primarily self-inflicted, but malicious
   **import files** (Excel/backup JSON) are a realistic injection vector. *Classified as a
@@ -650,8 +686,9 @@ several steps are expected to expose §13 items.
   ~5876–5882; no such elements) and the `ownerWarningMsg` warning element (6149/6164).
 - `loadSheetJS` dynamic loading (immediate no-op callback; assumes the static `<script>`
   succeeded).
-- Dead functions with zero call sites: `syncDebtFromReceipt` (4455), `renderReceiptRows`
-  (6230), `attachReceiptCalculations` (6092), `removeExpenseColumn` (8658).
+- Dead functions with zero call sites: `syncDebtFromReceipt`, `renderReceiptRows`,
+  `attachReceiptCalculations` (a fourth, `removeExpenseColumn`, disappeared with the removed
+  expenses module).
 - Packages purchase flow (display only).
 
 **Business rules that only the owner can confirm (code behavior noted; do not "fix" blindly):**
@@ -697,10 +734,16 @@ several steps are expected to expose §13 items.
 
 ## 18. About this document
 
-- Produced by static inspection of commit `3f8a70cf44fed81837c24665cc6838df8e81cd98` on
-  2026-10-17. Line numbers refer to that version of `sarfindexed.html`.
-- No application files were modified, no database was created or touched, and no real customer
-  or financial data was accessed (the repo contains none).
+- Originally produced by static inspection of commit `3f8a70cf44fed81837c24665cc6838df8e81cd98`
+  on 2026-10-17; revised the same day for the **Notes-module removal** (feature deletion +
+  IndexedDB v3→v4 migration + backup-list update, verified by syntax checks, handler/ID
+  cross-reference scans, and stub-executed tests of the extracted `initDB`, `restoreData`,
+  and page-state code — see the audit addendum). Line numbers not explicitly re-verified
+  still refer to the pre-removal file.
+- During the original inspection no application files were modified and no database was
+  created or touched. The later removal change modified `sarfindexed.html` only; it was
+  never run against any real browser profile/database, and no real customer or financial
+  data was accessed (the repo contains none).
 - Runtime behavior (browser rendering, actual IndexedDB upgrades from older versions, print
   layout on physical printers, SheetJS behavior on malformed files) remains **unverified**
   and is flagged as such wherever relevant.
