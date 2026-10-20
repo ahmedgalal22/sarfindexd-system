@@ -353,23 +353,10 @@ tr.drag-over {
     border-top: 3px solid #6366f1 !important;
 }
 
-        /* ===== صفحة الباقات ===== */
+        /* ===== صفحة شروط الاستخدام ===== */
         #packagesPage { background: linear-gradient(160deg,#f0f4ff 0%,#fafafa 60%,#f0fdf4 100%); min-height: 100vh; }
-        .pkg-card { background: white; border-radius: 20px; padding: 32px 28px; box-shadow: 0 4px 24px rgba(0,0,0,0.07); border: 1.5px solid #f1f5f9; transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .pkg-card:hover { transform: translateY(-6px); box-shadow: 0 24px 48px rgba(0,0,0,0.13); }
-        .pkg-card.popular { background: linear-gradient(170deg,#eff6ff 0%,white 50%); border: 2.5px solid #3b82f6; box-shadow: 0 20px 60px rgba(59,130,246,0.2); transform: scale(1.04); }
-        .pkg-card.popular:hover { transform: scale(1.04) translateY(-8px); box-shadow: 0 32px 72px rgba(59,130,246,0.28); }
-        .pkg-badge { display:inline-block; background:linear-gradient(135deg,#3b82f6,#1d4ed8); color:white; font-size:11px; font-weight:700; padding:4px 14px; border-radius:99px; letter-spacing:0.5px; }
-        .pkg-badge.en { background:linear-gradient(135deg,#1e40af,#1e3a8a); }
-        .pkg-feature { display:flex; align-items:flex-start; gap:10px; padding:7px 0; font-size:13.5px; color:#374151; border-bottom:1px solid #f3f4f6; }
-        .pkg-feature:last-child { border-bottom:none; }
-        .pkg-check { width:18px; height:18px; min-width:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-top:2px; }
-        .pkg-check svg { width:10px; height:10px; }
-        .pkg-btn { width:100%; padding:13px; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; transition:all 0.2s; border:none; }
         .terms-item { display:flex; align-items:flex-start; gap:12px; padding:11px 0; border-bottom:1px solid #f1f5f9; font-size:14px; color:#475569; line-height:1.6; }
         .terms-item:last-child { border-bottom:none; }
-        #pkgContactModal { display:none; position:fixed; inset:0; z-index:99999; background:rgba(0,0,0,0.55); align-items:center; justify-content:center; backdrop-filter:blur(4px); }
-        #pkgContactModal.open { display:flex; }
     </style>
 </head>
 
@@ -550,9 +537,9 @@ tr.drag-over {
                     </a>
                     <a href="#" data-page="packages" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg" style="margin-top:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 10V7"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
-                        <span style="font-weight:700;">الباقات</span>
+                        <span style="font-weight:700;">شروط الاستخدام</span>
                     </a>
                 </nav>
             </aside>
@@ -2234,128 +2221,12 @@ tr.drag-over {
 <!-- ============ نهاية صفحة الخزنة ============ -->
 
 
-        <!-- ===== صفحة الباقات ===== -->
+        <!-- ===== صفحة شروط الاستخدام ===== -->
         <div id="packagesPage" class="hidden">
 
-            <!-- Modal التواصل -->
-            <div id="pkgContactModal">
-                <div style="background:white;border-radius:20px;padding:40px 36px;max-width:420px;width:90%;text-align:center;box-shadow:0 32px 64px rgba(0,0,0,0.22);position:relative;">
-                    <button onclick="closePkgModal()" style="position:absolute;top:14px;left:14px;background:#f1f5f9;border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:18px;color:#64748b;line-height:1;display:flex;align-items:center;justify-content:center;">✕</button>
-                    <div style="width:64px;height:64px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;">
-                        <svg width="28" height="28" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                    </div>
-                    <h3 style="font-size:20px;font-weight:800;color:#1e293b;margin:0 0 8px;">التواصل مع المطور</h3>
-                    <p style="font-size:14px;color:#64748b;margin:0 0 24px;line-height:1.7;">للاستفسار عن الباقات أو طلب النظام<br>يمكنك التواصل مباشرة</p>
-                    <div style="background:#f8fafc;border-radius:14px;padding:20px;margin-bottom:24px;border:1px solid #e2e8f0;">
-                        <p style="font-size:16px;font-weight:700;color:#1e293b;margin:0 0 8px;">👨‍💻 أحمد جلال خضر</p>
-                        <p style="font-size:24px;font-weight:900;color:#3b82f6;margin:0;letter-spacing:2px;direction:ltr;">01014580684</p>
-                    </div>
-                    <button onclick="closePkgModal()" style="width:100%;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:white;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;">إغلاق</button>
-                </div>
-            </div>
 
             <div style="padding:40px 24px 60px;">
 
-                <!-- العنوان -->
-                <div style="text-align:center;margin-bottom:52px;">
-                    <div style="display:inline-flex;align-items:center;gap:8px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:99px;padding:6px 18px;font-size:13px;font-weight:600;color:#3b82f6;margin-bottom:16px;">
-                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 10V7"/></svg>
-                        نظام إدارة الحسابات — Karta System
-                    </div>
-                    <h1 style="font-size:clamp(22px,4vw,36px);font-weight:900;color:#0f172a;margin:0 0 14px;line-height:1.25;">باقات نظام إدارة الحسابات</h1>
-                    <p style="font-size:15px;color:#64748b;max-width:560px;margin:0 auto;line-height:1.8;">اختر الباقة المناسبة لنشاطك التجاري<br>جميع الباقات توفر نظام إدارة حسابات بسيط وسهل الاستخدام لمتابعة العمليات المالية والتقارير الأساسية</p>
-                </div>
-
-                <!-- البطاقات -->
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:28px;max-width:1060px;margin:0 auto 56px;align-items:start;">
-
-                    <!-- الباقة الأساسية -->
-                    <div class="pkg-card">
-                        <div style="margin-bottom:24px;">
-                            <div style="width:48px;height:48px;background:#f0fdf4;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
-                                <svg width="24" height="24" fill="none" stroke="#22c55e" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
-                            </div>
-                            <p style="font-size:11px;font-weight:700;color:#22c55e;letter-spacing:1.5px;margin:0 0 6px;">الباقة الأساسية</p>
-                            <div style="display:flex;align-items:baseline;gap:6px;">
-                                <span style="font-size:38px;font-weight:900;color:#0f172a;line-height:1;">3,800</span>
-                                <span style="font-size:15px;font-weight:600;color:#94a3b8;">جنيه</span>
-                            </div>
-                            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;margin-bottom:20px;font-size:13px;color:#92400e;display:flex;gap:8px;align-items:flex-start;line-height:1.5;">
-                            <span style="font-size:16px;min-width:20px;">⚠️</span>
-                            <span><strong>اشتراك دعم وتشغيل:</strong> 300 جنيه كل شهرين</span>
-                        </div>
-                        </div>
-                        <div style="margin-bottom:20px;">
-                            <div class="pkg-feature"><span class="pkg-check" style="background:#f0fdf4;"><svg viewBox="0 0 12 12" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>تشغيل نظام إدارة الحسابات</div>
-                            <div class="pkg-feature"><span class="pkg-check" style="background:#f0fdf4;"><svg viewBox="0 0 12 12" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>تسجيل العمليات المالية اليومية</div>
-                            <div class="pkg-feature"><span class="pkg-check" style="background:#f0fdf4;"><svg viewBox="0 0 12 12" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>إدارة الشركات والعملاء</div>
-                            <div class="pkg-feature"><span class="pkg-check" style="background:#f0fdf4;"><svg viewBox="0 0 12 12" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>إدارة أصحاب المركبات</div>
-                            <div class="pkg-feature"><span class="pkg-check" style="background:#f0fdf4;"><svg viewBox="0 0 12 12" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>عرض النماذج الخاصة بكل شركة</div>
-                            <div class="pkg-feature"><span class="pkg-check" style="background:#f0fdf4;"><svg viewBox="0 0 12 12" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>إجماليات العمليات المالية</div>
-                            <div class="pkg-feature"><span class="pkg-check" style="background:#f0fdf4;"><svg viewBox="0 0 12 12" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>تركيب النظام لأول مرة</div>
-                            <div class="pkg-feature"><span class="pkg-check" style="background:#f0fdf4;"><svg viewBox="0 0 12 12" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>تدريب أساسي على الاستخدام</div>
-                        </div>
-                        <button class="pkg-btn" onclick="openPkgModal()" style="background:white;border:2px solid #22c55e;color:#22c55e;" onmouseover="this.style.background='#22c55e';this.style.color='white'" onmouseout="this.style.background='white';this.style.color='#22c55e'">تواصل معنا</button>
-                    </div>
-                    <!-- الباقة المتقدمة - الأكثر اختياراً -->
-                    <div class="pkg-card popular" style="position:relative;">
-                        <div style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);display:flex;gap:6px;white-space:nowrap;">
-                            <span class="pkg-badge">⭐ الأكثر اختياراً</span>
-                            <span class="pkg-badge en">Most Popular</span>
-                        </div>
-                        <div style="margin-bottom:24px;margin-top:10px;">
-                            <div style="width:48px;height:48px;background:#dbeafe;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
-                                <svg width="24" height="24" fill="none" stroke="#3b82f6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                            </div>
-                            <p style="font-size:11px;font-weight:700;color:#3b82f6;letter-spacing:1.5px;margin:0 0 6px;">الباقة المتقدمة</p>
-                            <div style="display:flex;align-items:baseline;gap:6px;">
-                                <span style="font-size:38px;font-weight:900;color:#0f172a;line-height:1;">5,200</span>
-                                <span style="font-size:15px;font-weight:600;color:#94a3b8;">جنيه</span>
-                            </div>
-                            <div style="display:inline-flex;align-items:center;gap:5px;background:#dbeafe;border-radius:99px;padding:4px 12px;margin-top:8px;font-size:12px;font-weight:700;color:#1d4ed8;">
-                                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                بدون اشتراك دوري نهائياً
-                            </div>
-                        </div>
-                        <div style="margin-bottom:20px;">
-                            <p style="font-size:12px;font-weight:700;color:#3b82f6;margin:0 0 10px;padding-bottom:8px;border-bottom:2px dashed #bfdbfe;">✦ جميع مميزات الباقة الأساسية +</p>
-                            <div class="pkg-feature" style="color:#1e40af;"><span class="pkg-check" style="background:#dbeafe;"><svg viewBox="0 0 12 12" fill="none" stroke="#3b82f6" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span><strong>بدون اشتراك دوري نهائياً</strong></div>
-                            <div class="pkg-feature"><span class="pkg-check" style="background:#dbeafe;"><svg viewBox="0 0 12 12" fill="none" stroke="#3b82f6" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>تحسينات إضافية في واجهة النظام</div>
-                            <div class="pkg-feature"><span class="pkg-check" style="background:#dbeafe;"><svg viewBox="0 0 12 12" fill="none" stroke="#3b82f6" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>مساعدة في ضبط النظام حسب النشاط</div>
-                            <div class="pkg-feature"><span class="pkg-check" style="background:#dbeafe;"><svg viewBox="0 0 12 12" fill="none" stroke="#3b82f6" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>أولوية في الدعم الفني (شهر)</div>
-                        </div>
-                        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 14px;margin-bottom:20px;font-size:13px;color:#1e40af;display:flex;gap:8px;align-items:center;">
-                            <span>💎</span><span><strong>الأفضل قيمة مقابل المال</strong> — ادفع مرة واحدة فقط</span>
-                        </div>
-                        <button class="pkg-btn" onclick="openPkgModal()" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:white;box-shadow:0 6px 20px rgba(59,130,246,0.4);" onmouseover="this.style.boxShadow='0 10px 30px rgba(59,130,246,0.55)'" onmouseout="this.style.boxShadow='0 6px 20px rgba(59,130,246,0.4)'">تواصل معنا</button>
-                    </div>
-
-                    <!-- الباقة المخصصة -->
-                    <div class="pkg-card">
-                        <div style="margin-bottom:24px;">
-                            <div style="width:48px;height:48px;background:#fdf4ff;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
-                                <svg width="24" height="24" fill="none" stroke="#a855f7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
-                            </div>
-                            <p style="font-size:11px;font-weight:700;color:#a855f7;letter-spacing:1.5px;margin:0 0 6px;">باقة مخصصة</p>
-                            <div style="display:flex;align-items:baseline;gap:6px;">
-                                <span style="font-size:38px;font-weight:900;color:#0f172a;line-height:1;">7,200</span>
-                                <span style="font-size:15px;font-weight:600;color:#94a3b8;">جنيه</span>
-                            </div>
-                            <div style="display:flex;align-items:baseline;gap:6px;">
-                                <span style="font-size:26px;font-weight:900;color:#0f172a;line-height:1.2;">حسب الاتفاق</span>
-                            </div>
-                        </div>
-                        <div style="margin-bottom:20px;">
-                            <div class="pkg-feature"><span class="pkg-check" style="background:#fdf4ff;"><svg viewBox="0 0 12 12" fill="none" stroke="#a855f7" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>تصميم نظام مخصص حسب الاحتياج</div>
-                            <div class="pkg-feature"><span class="pkg-check" style="background:#fdf4ff;"><svg viewBox="0 0 12 12" fill="none" stroke="#a855f7" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>إضافة تعديلات خاصة</div>
-                            <div class="pkg-feature"><span class="pkg-check" style="background:#fdf4ff;"><svg viewBox="0 0 12 12" fill="none" stroke="#a855f7" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>إمكانية إضافة ميزات جديدة للنظام</div>
-                            <div class="pkg-feature"><span class="pkg-check" style="background:#fdf4ff;"><svg viewBox="0 0 12 12" fill="none" stroke="#a855f7" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></span>تطويرات إضافية حسب الطلب</div>
-                        </div>
-                        <div style="height:58px;margin-bottom:20px;"></div>
-                        <button class="pkg-btn" onclick="openPkgModal()" style="background:white;border:2px solid #a855f7;color:#a855f7;" onmouseover="this.style.background='#a855f7';this.style.color='white'" onmouseout="this.style.background='white';this.style.color='#a855f7'">تواصل معنا</button>
-                    </div>
-
-                </div><!-- end grid -->
 
                 <!-- شروط الاستخدام -->
                 <div style="max-width:780px;margin:0 auto 40px;">
@@ -2364,7 +2235,7 @@ tr.drag-over {
                             <div style="width:42px;height:42px;background:#fffbeb;border-radius:10px;display:flex;align-items:center;justify-content:center;min-width:42px;">
                                 <svg width="20" height="20" fill="none" stroke="#d97706" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                             </div>
-                            <h2 style="font-size:20px;font-weight:800;color:#0f172a;margin:0;">شروط استخدام النظام</h2>
+                            <h2 style="font-size:20px;font-weight:800;color:#0f172a;margin:0;">شروط الاستخدام</h2>
                         </div>
                         <div>
                             <div class="terms-item"><span style="color:#3b82f6;font-size:17px;font-weight:800;min-width:24px;">①</span><span>يحصل المستخدم على حق استخدام النظام داخل نشاطه التجاري فقط.</span></div>
@@ -2374,11 +2245,6 @@ tr.drag-over {
                             <div class="terms-item"><span style="color:#ef4444;font-size:17px;font-weight:800;min-width:24px;">⑤</span><span>لا يشمل الضمان مشاكل الأجهزة أو الكهرباء أو حذف البيانات من قبل المستخدم.</span></div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Footer -->
-                <div style="text-align:center;">
-                    <p style="font-size:13px;color:#94a3b8;">© 2025 Karta System &nbsp;|&nbsp; تطوير: أحمد جلال خضر &nbsp;|&nbsp; 01014580684</p>
                 </div>
 
             </div>
@@ -9681,11 +9547,6 @@ window.exportAllReceiptsToExcel = function() {
     };
 };
 
-
-        // ===== Modal الباقات =====
-        window.openPkgModal  = function() { document.getElementById('pkgContactModal').classList.add('open'); document.body.style.overflow='hidden'; };
-        window.closePkgModal = function() { document.getElementById('pkgContactModal').classList.remove('open'); document.body.style.overflow=''; };
-        document.addEventListener('keydown', function(e){ if(e.key==='Escape') closePkgModal(); });
 
     </script>
     <!-- ====== نافذة إضافة صاحب مركبة المنبثقة ====== -->

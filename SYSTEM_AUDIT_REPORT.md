@@ -30,6 +30,31 @@
 > was removed — see §7 annotations and §10). Line numbers throughout this report remain
 > references to the inspected pre-removal file; do not treat any other finding as resolved.
 
+> **Post-audit change addendum #2 (2026-10-17, after the Notes-removal change):** the former
+> **Packages page was converted into a Terms of Use-only page** in `sarfindexed.html`
+> (10,576 → 10,437 lines; 599,943 → 581,446 bytes; app diff **+5 / −144**). Removed: the
+> package contact modal, marketing title block, all three package cards (names, prices,
+> durations, feature lists, and purchase/contact buttons), the page footer/attribution,
+> package-only CSS, `openPkgModal`/`closePkgModal`, and their Escape listener. The user-facing
+> sidebar/page name is now **شروط الاستخدام**, and the retained page contains only the
+> pre-existing five-item Arabic Terms of Use card; its visible text was preserved verbatim
+> (visible-text SHA-256 unchanged:
+> `753aea71bc4836c21e6d89abe069ecd39189f209660fdf6f11004d6a4f4ade1c`). No Terms acceptance
+> checkbox, acknowledgement recording, or gating mechanism existed before the change, and none
+> was added. Internal identifiers `data-page="packages"` and `id="packagesPage"` were
+> deliberately retained so sidebar navigation and saved page state remain compatible. No
+> package IndexedDB store, package-named record field, or package-specific web-storage use was
+> found; therefore **no database version, schema, persisted-record, backup-format, or migration
+> change was made**. Verification actually performed: `node --check` on both extracted script
+> blocks (pass); five Terms items remain and their visible-text hash matches the pre-edit
+> value; 106 inline handlers resolve with 0 unresolved; references to `openPkgModal`,
+> `closePkgModal`, and `pkgContactModal` are 0; every sidebar destination has a matching page
+> container; and the final `packagesPage` container contains only the Terms card. **Not**
+> verified in a real browser — a disposable-profile runtime smoke test is still required.
+> Consequently, **AUDIT-042 is marked "Superseded by removal"** because the product no longer
+> offers packages; this is not an implementation of a purchase flow. Do not treat any other
+> finding as resolved by this change.
+
 **Classification vocabulary used for every finding:**
 `Confirmed defect` (the faulty behavior follows necessarily from the code as written; not
 necessarily runtime-reproduced) · `Potential risk` (plausible failure needing runtime/scenario
@@ -106,7 +131,7 @@ remain open as written against the inspected commit.)*
 | 9 | All receipts | date + isPaid + take filters; Σtotal/Σremaining; status selects; edit/print/delete; export-all Excel (modes 1/2/3 + summary) | CRUD: receipts, offices |
 | 10 | Treasury | 3 accounts; deposit/withdraw/transfer (mirrored pair, overdraw block); tx list/edit/soft-delete; denominations (display only); daily closing; alerts (localStorage); forecast = Σ office last-debt remaining | CRUD: treasuryTransactions, dailyClosing |
 | 11 | Notes | **REMOVED 2026-10-17 (post-audit)** — formerly: text note; dated table notes (add/search/edit/delete/bulk/print); external-expenses modal + client-page summary card. The `notes` store is dropped by the v4 migration (see addendum). Per-receipt/debt note fields in #6/#8 were preserved (independent features) | ~~CRUD: notes~~ |
-| 12 | Packages | static pricing display only | — |
+| 12 | Terms of Use | **CONVERTED 2026-10-17 (post-audit)** — formerly Packages static pricing display. Now read-only display of the pre-existing five-item Arabic Terms of Use only; package cards, prices, feature lists, purchase/contact actions, contact modal, package CSS, and `openPkgModal`/`closePkgModal` removed. Internal page id remains `packages`/`packagesPage` for navigation/saved-state compatibility (see addendum #2). | — |
 | — | Global | JSON backup (all stores/all users), restore (clear+reinsert), 7-day auto-backup prompt, page-state restore | all stores |
 
 UI-vs-behavior mismatches are called out per finding (notably AUDIT-011 company fields,
@@ -372,7 +397,7 @@ in repo). Financial formulas and DB flows have no regression safety net.
 no password change. **AUDIT-024 — Missing capability — Low.** Dead code with zero call sites:
 `syncDebtFromReceipt` (4455), `renderReceiptRows` (6230), `attachReceiptCalculations` (6092),
 `removeExpenseColumn` (8658) — removal candidates that currently mislead maintainers.
-**AUDIT-042 — Missing capability — Low.** Packages page has no purchase/activation logic.
+**AUDIT-042 — Missing capability — Low — Superseded by removal 2026-10-17.** Packages page has no purchase/activation logic. *(Historical finding retained for context: the Packages feature has since been removed and the page converted to Terms of Use only — see Post-audit change addendum #2 and inventory row #12. This does not implement a purchase flow.)*
 **AUDIT-045 — Missing capability — Medium.** No audit trail: edits/deletes of financial
 records leave no history (treasury soft-delete excepted). **AUDIT-046 — Missing capability —
 Medium.** No sync/server backup; single-browser data residency (operational constraint, see

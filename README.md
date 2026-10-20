@@ -18,6 +18,13 @@
 > re-verified now refer to the pre-removal inspected file and have shifted by roughly
 > −1,040 lines; function/element names remain the reliable anchors. Per-receipt note fields
 > in Vehicle/Office detail were **not** part of the removed module and still exist.
+>
+> **Revision 2026-10-17 (2) — Packages page converted to Terms of Use.** All package
+> offerings (cards, prices/features, contact modal) were removed; the page now contains
+> only the pre-existing Terms of Use text (verbatim) and is labelled "شروط الاستخدام" in the
+> UI. The internal page id remains `packages`/`packagesPage` so navigation and saved page
+> state are unaffected. No database change was involved (no package data was persisted).
+> Line references shifted a further −139 lines.
 
 ---
 
@@ -26,7 +33,7 @@
 | Item | Value (verified from source) |
 |---|---|
 | Product name (in UI/code) | "Karta System" (UI is Arabic, RTL) |
-| Main file | `sarfindexed.html` — 10,576 lines, 599,943 bytes (after the 2026-10-17 Notes removal; 11,616 lines before) |
+| Main file | `sarfindexed.html` — 10,437 lines, 581,446 bytes (after the 2026-10-17 Notes removal and Packages→Terms conversion; 11,616 lines originally) |
 | Purpose | Single-page, offline, browser-local application for managing transport "karta" (كارتة) payment receipts for vehicle owners (أصحاب المركبات), offices (المكاتب), debts (المديونيات), a cash treasury (الخزنة), printing, Excel import/export, and JSON backup/restore |
 | Users | Seeded local accounts only (3 accounts are created by code on first run; see §5.1). No registration screen was found |
 | Data location | **This browser, this device only** (IndexedDB + localStorage). No server, no cloud sync, no network calls exist in the code |
@@ -47,8 +54,8 @@ table were permanently removed on 2026-10-17; see §5.11.)*
 
 **Out of scope / not present:** any backend, multi-device sync, roles/permissions, audit
 trail/history of edits, password management UI, automated tests, build tooling, or a payment
-gateway. The "Packages" (الباقات) page is a static pricing/display page; no purchase or
-subscription logic exists in code.
+gateway. (A former static "Packages" (الباقات) pricing page was converted to a
+Terms-of-Use-only page on 2026-10-17; no purchase/subscription logic ever existed.)
 
 ---
 
@@ -59,9 +66,9 @@ Verified from the actual files (not assumed):
 | Layer | What is actually used | Evidence |
 |---|---|---|
 | Markup | One HTML file, `lang="ar"`, `dir="rtl"` | `sarfindexed.html` lines 1–9 |
-| Styling | (a) Pre-generated utility CSS file `tailwind.css` (Tailwind-style class names; **not** the Tailwind CDN/play build); (b) one inline `<style>` block (lines 10–381) with custom CSS (print rules, drag styles, packages page, scrollbars) | `tailwind.css` header: *"Generated for Karta System… Covers all 351 utility classes used in index_filters.html… Compatible with @tailwindcss/browser@4… Generated: 2026-02-18"* |
+| Styling | (a) Pre-generated utility CSS file `tailwind.css` (Tailwind-style class names; **not** the Tailwind CDN/play build); (b) one inline `<style>` block (lines 10–360) with custom CSS (print rules, drag styles, terms page, scrollbars) | `tailwind.css` header: *"Generated for Karta System… Covers all 351 utility classes used in index_filters.html… Compatible with @tailwindcss/browser@4… Generated: 2026-02-18"* |
 | Font | Self-hosted "Cairo" via `cairo-font.css`, referencing `fonts/*.woff2` — **the `fonts/` directory is missing from the repo**, so the browser falls back to default fonts | `cairo-font.css`; `ls fonts` → absent |
-| JavaScript | Vanilla JS only (no framework, no modules, no bundler). Two inline `<script>` blocks (main app; receipt Excel + treasury-linked edit/delete modals). Extensive use of inline `onclick`/`onchange` handlers and `window.*` globals | Direct inspection; 218 function definitions by static parse (239 before Notes removal) |
+| JavaScript | Vanilla JS only (no framework, no modules, no bundler). Two inline `<script>` blocks (main app; receipt Excel + treasury-linked edit/delete modals). Extensive use of inline `onclick`/`onchange` handlers and `window.*` globals | Direct inspection; 216 function definitions by static parse (239 before Notes removal; 218 before Packages removal) |
 | Spreadsheet | SheetJS (`xlsx.full.min.js`), version string `0.18.5`, loaded locally at line 9 | `xlsx.full.min.js` (881,727 bytes) |
 | Database | Browser **IndexedDB**, database `KartaSystemDB`, version **4** (was 3 before 2026-10-17; the v4 upgrade deletes the legacy `notes` store — §9.1) | `indexedDB.open(DB_NAME, DB_VERSION)` with `DB_VERSION = 4` in `initDB` |
 | Secondary storage | `localStorage` for session, page-state, migration flags, treasury alert/denomination preferences | See §9.4 |
@@ -88,7 +95,7 @@ The repository contains exactly five files (verified with `git ls-files` / `find
 
 | File | Size | Role |
 |---|---|---|
-| `sarfindexed.html` | 599,943 bytes / 10,576 lines | The entire application: inline CSS (10–373), body markup (≈376–2386), main script (2387–9690), second script (9791–10346), trailing modal markup (10348–10576) |
+| `sarfindexed.html` | 581,446 bytes / 10,437 lines | The entire application: inline CSS (10–360), body markup (≈363–2252), main script (2253–9551), second script (9652–10207), trailing modal markup (10209–10437) |
 | `tailwind.css` | 31,696 bytes / 574 lines | Pre-generated utility CSS (see §2 caveats) |
 | `cairo-font.css` | 5,336 bytes / 134 lines | `@font-face` declarations for Cairo; depends on missing `fonts/` |
 | `xlsx.full.min.js` | 881,727 bytes | SheetJS 0.18.5 (Excel read/write) |
@@ -98,22 +105,23 @@ Internal layout of `sarfindexed.html`:
 
 - Lines 1–9: doctype, head, local resource links (`cairo-font.css`, `tailwind.css`,
   `xlsx.full.min.js`).
-- Lines 10–373: inline `<style>`.
-- Lines ≈376–2386: body markup — login screen, sidebar navigation, all pages
+- Lines 10–360: inline `<style>`.
+- Lines ≈363–2252: body markup — login screen, sidebar navigation, all pages
   (`home`, `client`, `receipt`, `allReceipts`, `vehicles`, vehicle detail, `offices`, office
-  detail, `treasury`, `packages`) and datalists.
-- Lines 2387–9690: **Script 1** — DevTools blocker, IndexedDB init (incl. the v4
+  detail, `treasury`, `packages` — internal id retained; displayed as "شروط الاستخدام") and
+  datalists.
+- Lines 2253–9551: **Script 1** — DevTools blocker, IndexedDB init (incl. the v4
   notes-store-drop migration), auth, navigation/page state, dashboard, data migrations,
   vehicles CRUD/details/debts, karta rendering + **two receipt-editing implementations**
   (inline card editor *and*, in Script 2, a modal editor), operations table, receipt form +
   save flow, offices CRUD/details/debts/kartas, notifications, client page, all-receipts +
   status synchronization, backup/restore, drag-and-drop ordering, vehicle/office Excel,
   de-duplication, treasury module, export-all.
-- Lines 9692–9790: modal markup between the two scripts (`addVehicleModal`,
+- Lines 9553–9651: modal markup between the two scripts (`addVehicleModal`,
   `addOfficeModal`, `restoreModal`).
-- Lines 9791–10346: **Script 2** — receipt-form Excel export/import, delete-with-treasury
+- Lines 9652–10207: **Script 2** — receipt-form Excel export/import, delete-with-treasury
   -refund flow, receipt **edit modal** (`em*` functions).
-- Lines 10348–10576: static modal markup: `receiptSaveWithdrawModal`,
+- Lines 10209–10437: static modal markup: `receiptSaveWithdrawModal`,
   `receiptDeleteRestoreModal`, `editReceiptModal`.
 
 ---
@@ -293,8 +301,13 @@ updated app opens that database. Back up first if that data must be retained out
 Independent per-receipt note fields (Vehicle Detail / Office Detail cards) and debt-row note
 fields were *not* part of this module and remain fully functional (§5.6/§5.8).
 
-### 5.12 Packages (الباقات)
-Static marketing/pricing cards. No purchase, activation, or feature-gating logic exists.
+### 5.12 Terms of Use (شروط الاستخدام)
+Read-only display of the system's five-item Arabic Terms of Use (verbatim; no acceptance
+checkbox, acknowledgement recording, or gating exists). Formerly the "Packages" (الباقات)
+pricing page: all package cards, feature lists, purchase/contact actions, the contact modal,
+and their CSS/JavaScript (`openPkgModal`/`closePkgModal`) were removed on 2026-10-17, leaving
+only the pre-existing terms section. The internal page id remains `packages`/`packagesPage`, so
+sidebar navigation and saved page state keep working under the new label "شروط الاستخدام".
 
 ---
 
@@ -396,8 +409,9 @@ record.
 ## 7. Functions and modules (overview)
 
 There are no modules/files to import — everything is global-scope functions in two script
-blocks. 218 function definitions were counted statically (including nested closures; 239
-before the Notes removal, which deleted 21). Key
+blocks. 216 function definitions were counted statically (including nested closures; 239
+before the Notes removal, which deleted 21, and 218 before the Packages removal, which
+deleted 2). Key
 groups (line numbers refer to `sarfindexed.html` @ inspected commit; the audit report's
 appendix contains the complete generated index):
 
@@ -689,7 +703,6 @@ several steps are expected to expose §13 items.
 - Dead functions with zero call sites: `syncDebtFromReceipt`, `renderReceiptRows`,
   `attachReceiptCalculations` (a fourth, `removeExpenseColumn`, disappeared with the removed
   expenses module).
-- Packages purchase flow (display only).
 
 **Business rules that only the owner can confirm (code behavior noted; do not "fix" blindly):**
 1. Receipt-save treasury withdrawal is `totals.remaining` — should it be `paid`, `total`, or
@@ -738,8 +751,15 @@ several steps are expected to expose §13 items.
   on 2026-10-17; revised the same day for the **Notes-module removal** (feature deletion +
   IndexedDB v3→v4 migration + backup-list update, verified by syntax checks, handler/ID
   cross-reference scans, and stub-executed tests of the extracted `initDB`, `restoreData`,
-  and page-state code — see the audit addendum). Line numbers not explicitly re-verified
-  still refer to the pre-removal file.
+  and page-state code — see the audit addendum), and revised again for the **Packages →
+  Terms of Use conversion** (all package cards/prices/purchase-contact actions, modal, CSS,
+  and the `openPkgModal`/`closePkgModal` functions removed; the pre-existing five-item terms
+  text retained verbatim; internal page id `packages`/`packagesPage` kept for navigation and
+  saved-page-state compatibility; no database, persisted-record, or backup-format change;
+  verified by syntax checks, handler/ID cross-reference scans, a terms-text hash comparison,
+  and documentation-anchor/leftover-reference greps — not verified in a real browser; see the
+  second audit addendum). Line numbers not explicitly re-verified still refer to the
+  pre-removal file.
 - During the original inspection no application files were modified and no database was
   created or touched. The later removal change modified `sarfindexed.html` only; it was
   never run against any real browser profile/database, and no real customer or financial
